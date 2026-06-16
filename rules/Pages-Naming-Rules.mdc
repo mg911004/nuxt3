@@ -1,0 +1,74 @@
+---
+description: Nuxt pages/ 라우트·파일·디렉터리 네이밍 규칙
+alwaysApply: true
+---
+
+# Page File Naming
+
+- Use **kebab-case** for all page filenames and directories under `pages/`.
+- Do not use PascalCase inside `pages/`.
+- Folder structure represents route hierarchy.
+- Page names must be semantic and URL-friendly.
+
+## Avoid generic filenames
+
+- `page.vue`
+- `temp.vue`
+- `test.vue`
+
+# Route Structure
+
+- Folder name = route/domain context.
+- File name = route responsibility.
+- Prefer shallow, readable structures over deep nesting.
+
+# Examples
+
+```
+pages/
+├─ dashboard/
+│  ├─ index.vue              → /dashboard
+│  ├─ analytics.vue          → /dashboard/analytics
+│  └─ user-management.vue    → /dashboard/user-management
+├─ auth/
+│  ├─ login.vue              → /auth/login
+│  └─ forgot-password.vue    → /auth/forgot-password
+└─ users/
+   ├─ index.vue               → /users
+   ├─ create.vue              → /users/create
+   └─ [id].vue                → /users/:id
+```
+
+# Dynamic Routes
+
+- Use bracket syntax for params: `[id].vue`, `[userId].vue`.
+- Prefer descriptive param names (`[userId].vue`, `[postId].vue`).
+- Avoid vague names (`[value].vue`, `[data].vue`).
+
+# Index Pages
+
+- Use `index.vue` only as the default entry route for a folder.
+- Do not nest `index.vue` files unnecessarily.
+
+# Nested Routes
+
+Prefer flat sibling files:
+
+```
+pages/dashboard/
+├─ index.vue      → /dashboard
+└─ settings.vue   → /dashboard/settings
+```
+
+Avoid redundant or overly prefixed names:
+
+```
+pages/dashboard/
+├─ page.vue                 ✗
+└─ dashboard-settings.vue   ✗
+```
+
+# Depth Limit
+
+- Avoid deeply nested directories unless the domain truly requires it.
+- Prefer `/dashboard/settings` over `/dashboard/system/user/settings`.
