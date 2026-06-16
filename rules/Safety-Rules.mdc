@@ -1,0 +1,23 @@
+---
+description: 프로덕션 코드 변경 시 안전·범위·리스크 관리 규칙
+alwaysApply: true
+---
+
+# Forbidden Actions
+
+- Do not refactor large areas of code unless explicitly requested.
+- Do not add new libraries unless the task requires them.
+- Do not change business logic behavior silently.
+- Do not remove validation or error handling.
+
+# Change Control
+
+- Make the smallest diff that solves the task.
+- If a change affects multiple files, explain the impact before or while implementing.
+- If requirements are unclear, ask instead of guessing.
+
+# Risk Awareness
+
+- Treat all code as production-critical.
+- Avoid risky global or cross-cutting changes.
+- Be conservative with dependency upgrades and architectural changes.
