@@ -1,0 +1,87 @@
+---
+description: method 네이밍 규칙
+alwaysApply: true
+---
+
+# API Layer (`api/*.api.ts`)
+
+- Export a factory function per domain: `{domain}Api()` (e.g. `userApi`, `authApi`).
+- Call `$api` only inside `api/*.api.ts`, never in Vue components.
+- Prefer these method names inside the returned object:
+
+| Action | Pattern               | Example                   |
+| :----- | :-------------------- | :------------------------ |
+| List   | `fetch{Domain}List`   | `fetchUserList()`         |
+| Detail | `fetch{Domain}Detail` | `fetchUserDetail(id)`     |
+| Create | `create{Domain}`      | `createUser(payload)`     |
+| Update | `update{Domain}`      | `updateUser(id, payload)` |
+| Delete | `delete{Domain}`      | `deleteUser(id)`          |
+
+- Action-specific verbs are allowed when clearer than CRUD (e.g. `login`, `logout`, `refreshAccessToken`).
+
+```typescript
+export const authApi = () => {
+  const { $api } = useNuxtApp();
+  return {
+    login: (payload: UserLogin) => $api.post('/auth/login', payload),
+    logout: () => $api.post('/auth/logout'),
+  };
+};
+```
+
+# UI Event Handlers
+
+- Prefix with `handle` + action verb.
+- Use in Vue components for user-triggered events (click, submit, search, etc.).
+
+| Pattern                  | Example                                             |
+| :----------------------- | :-------------------------------------------------- |
+| `handle{Action}`         | `handleSubmit()`, `handleSearch()`, `handleReset()` |
+| `handle{Object}{Action}` | `handleOpenModal()`, `handleClickSave()`            |
+
+- Do not use `onSubmit`, `onClickSave`, etc. for component-local handlers. Reserve `on*` for Vue emit callbacks when needed.
+
+# Composables (`composables/useXxx.ts`)
+
+- Prefix with `use` + domain or capability.
+
+```typescript
+useAuth();
+useAlert();
+useDefect();
+```
+
+# Pinia Stores (`stores/xxx.store.ts`)
+
+- Store composable name: `use{Domain}Store()`.
+
+```typescript
+useUserStore();
+useAuthStore();
+```
+
+# Boolean Variables
+
+- Prefix with `is`, `has`, `can`, or `should`.
+
+```typescript
+isLoading;
+isSubmitting;
+isValid;
+hasPermission;
+canEdit;
+```
+
+# Tab / Dynamic Component State
+
+When using `BaseTabs` with `<component :is>`, use the `active*` prefix consistently.
+
+| Variable               | Purpose                                      |
+| :--------------------- | :------------------------------------------- |
+| `activeTab`            | `BaseTabs` v-model value (number id)         |
+| `activeComponent`      | `<component :is>` target                     |
+| `activeComponentProps` | Props passed via `v-bind` (only when needed) |
+
+- If multiple tab groups exist in one page, include the domain in the name (e.g. `activeStatusTab`, `activeStatusComponent`).
+- `BaseTabItem.id` must be a `number` (0, 1, 2, …), not a string.
+- Do not use `onChangeComponent` or `currentComponent` for this pattern.
