@@ -1,0 +1,202 @@
+---
+description: Nuxt 3 프로젝트 공통 코딩·구조·폼·메시지 규칙
+alwaysApply: true
+---
+
+# Stack Assumptions
+
+- Nuxt 3
+- Vue 3 Composition API (`<script setup lang="ts">`)
+- TypeScript
+- Pinia
+
+# Coding Standards
+
+- Use Composition API only. Do not use Options API.
+- Extract reusable logic into composables (`composables/useXxx.ts`).
+- Keep components small and single-responsibility.
+- Prefer early return over deeply nested `if` blocks.
+- Use descriptive variable names.
+- Prefer `const` over `let`.
+- Prefer `const` arrow functions for handlers and helpers.
+- Write simple, readable code. Avoid clever or over-abstracted solutions.
+
+# File Structure
+
+- Follow the existing project directory layout.
+- Do not move or rename files unless the task requires it.
+- Match existing naming conventions in the same domain before introducing new patterns.
+
+# State Management
+
+- Use Pinia stores only when state is shared across multiple features.
+- Avoid unnecessary global state.
+- Keep store logic minimal.
+- In components, prefer `ref` or `shallowRef` for local state.
+- Do not use `reactive` unless there is a clear reason.
+
+# TypeScript Rules
+
+- Do not use `any`.
+- Prefer explicit interfaces and types.
+- Derive form types from Zod schemas with `z.infer<typeof xxxSchema>` when possible.
+
+# Nuxt Rules
+
+- Do not mix multiple data-fetching patterns in the same feature.
+- Respect the project's existing SSR/SPA configuration.
+
+# UI / Component Rules
+
+- Reuse existing components before creating new ones.
+- Do not over-engineer UI components.
+- Keep props and emits minimal and clearly typed.
+- Component naming and directory rules: see `Component-Naming-Rules.mdc`.
+
+# Import Rules
+
+- Prefer Nuxt auto imports for Vue APIs, composables, and stores.
+- Import from `#components` when a component is referenced inside `<script>` (not in template).
+
+# File Naming
+
+| Kind       | Location               | Pattern                 | Example                    |
+| :--------- | :--------------------- | :---------------------- | :------------------------- |
+| Page       | `pages/`               | kebab-case              | `user-management.vue`      |
+| Component  | `components/{domain}/` | PascalCase              | `DefectSearchSection.vue`  |
+| Composable | `composables/`         | `useXxx.ts`             | `useAlert.ts`              |
+| API        | `api/`                 | `xxx.api.ts`            | `user.api.ts`              |
+| Store      | `stores/`              | `xxx.store.ts`          | `user.store.ts`            |
+| Model      | `models/`              | `xxx.model.ts`          | `user.model.ts`            |
+| Schema     | `schemas/`             | `xxx.schema.ts`         | `user.schema.ts`           |
+| Constant   | `constants/`           | UPPER_SNAKE_CASE export | `messages.ts` → `MESSAGES` |
+
+# API Rules
+
+- Place HTTP functions in `api/*.api.ts` as `{domain}Api()` factory functions.
+- Define API request/response types in `models/*.model.ts`.
+- Do not define API types inside Vue components.
+- Do not call axios or `$api` directly inside Vue components. Use `{domain}Api()` instead.
+- Handle API errors explicitly. Do not fail silently.
+
+# Async Rules
+
+- Prefer `async/await` over `.then()/.catch()`.
+
+# Form Rules
+
+- Search filter state variable name: `searchCondition`.
+- Form input state variable name: `{domain}Form` (e.g. `userForm`, `defectForm`).
+- Use **Zod** for all form and input validation.
+- Define schemas in `schemas/{domain}.schema.ts`. Do not define schemas inline in Vue files, stores, or composables.
+- Export both the schema and inferred type from the schema file.
+
+```typescript
+// schemas/user.schema.ts
+export const userLoginSchema = z.object({ ... });
+export type UserLogin = z.infer<typeof userLoginSchema>;
+```
+
+- Use `MESSAGES.VALIDATION` for Zod error messages.
+- In submit handlers, call `schema.safeParse(formData)` first.
+- If validation fails, show the first error with `useAlert().showWarning()` and return early.
+- Do not call API functions until validation passes.
+
+# Message Rules
+
+- Define all user-facing text in `constants/messages.ts` as `MESSAGES`.
+- Do not hardcode alert, confirm, validation, status, or error strings in components, composables, or utils.
+- Import `MESSAGES` and reference the correct group:
+
+| Group                                  | Use for                        | Example call site                           |
+| :------------------------------------- | :----------------------------- | :------------------------------------------ |
+| `MESSAGES.VALIDATION`                  | Zod / field validation         | `userLoginSchema`                           |
+| `MESSAGES.CONFIRM`                     | Confirm dialog                 | `useAlert().confirm(MESSAGES.CONFIRM.SAVE)` |
+| `MESSAGES.ALERT`                       | Business rule / action blocked | `useAlert().showWarning(...)`               |
+| `MESSAGES.STATUS`                      | Operation result feedback      | `useAlert().showSuccess(...)`               |
+| `MESSAGES.ERROR`                       | HTTP / system errors           | `handleError.ts`                            |
+| `MESSAGES.COMMON`, `UI`, `BUSINESS`, … | Domain-specific messages       | As needed                                   |
+
+- Add a new entry to `messages.ts` before using it in code.
+
+# Script Setup Order
+
+## 1. Global declarations
+
+```ts
+// imports
+
+// page meta
+definePageMeta({ ... })
+
+// props / emits
+const props = defineProps<...>()
+const emit = defineEmits<...>()
+
+// composables / stores
+const route = useRoute()
+const userStore = useUserStore()
+```
+
+## 2. Feature blocks
+
+Group related state, computed, and functions together by feature/domain.
+
+Examples: Search, User, Role, Form, Table, Modal, Permission, etc.
+
+```ts
+/**
+ * Search
+ */
+const searchForm = ref(...)
+const handleSearch = async () => {}
+
+/**
+ * User
+ */
+const users = ref([])
+const userCount = computed(...)
+const fetchUsers = async () => {}
+```
+
+## 3. Watch
+
+```ts
+watch(...)
+```
+
+## 4. Lifecycle
+
+```ts
+onMounted(...)
+```
+
+## 5. Expose
+
+```ts
+defineExpose(...)
+```
+
+### Rule
+
+❌ Group by type
+
+```ts
+// state
+// computed
+// functions
+```
+
+✅ Group by feature/domain
+
+```ts
+// Search
+// User
+// Role
+// Form
+// Modal
+// ...
+```
+
+Method and handler naming: see `Method-Naming-Rules.mdc`.
+Page routing and file naming: see `Pages-Naming-Rules.mdc`.
