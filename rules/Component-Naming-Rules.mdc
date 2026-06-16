@@ -1,0 +1,57 @@
+---
+description: 컴포넌트 명명 규칙
+globs: components/**/*.vue
+alwaysApply: true
+---
+
+# Component Naming & Directory Rules
+
+Follow the **Domain-Driven Hybrid Structure** so Nuxt auto-import produces clean tags like `<SiteSelectModal />`.
+
+## Directory and File Pattern
+
+| Part      | Rule                                         | Example                                          |
+| :-------- | :------------------------------------------- | :----------------------------------------------- |
+| Directory | lowercase domain name                        | `components/site/`, `components/defect/`         |
+| Filename  | `[Domain][Target][UIType].vue` in PascalCase | `SiteSelectModal.vue`, `DefectSearchSection.vue` |
+
+- The filename must describe both **what** (target/role) and **how it looks** (UI type).
+- Do not use generic filenames that omit domain or UI type.
+
+## Good Examples
+
+```
+components/site/SiteSelectModal.vue
+components/site/SiteSearchForm.vue
+components/user/UserDetailModal.vue
+components/user/UserTable.vue
+components/defect/DefectSearchSection.vue
+```
+
+## Bad Examples
+
+```
+components/site/SelectModal.vue   ✗ missing domain prefix
+components/site/Modal.vue         ✗ too generic
+components/user/Table.vue         ✗ missing domain prefix
+```
+
+## UI Type Suffixes
+
+Use a consistent suffix that describes the component shape:
+
+| Suffix    | Use for            |
+| :-------- | :----------------- |
+| `Modal`   | Dialog / modal     |
+| `Form`    | Input form         |
+| `Table`   | Data table         |
+| `Card`    | Card layout        |
+| `List`    | List layout        |
+| `Section` | Page section block |
+
+## Props and Emits
+
+|       | `<script setup>` | `<template>` (parent) | Example                         |
+| :---- | :--------------- | :-------------------- | :------------------------------ |
+| Props | camelCase        | kebab-case            | `userProfile` → `:user-profile` |
+| Emits | camelCase        | kebab-case            | `closeModal` → `@close-modal`   |
